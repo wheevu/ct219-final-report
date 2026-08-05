@@ -1,38 +1,39 @@
 # Vietnamese NLP Preprocessing Pipeline
 
-Streaming preprocessing for raw Vietnamese text, part of the university NLP final
-project (next-token generation from raw Vietnamese text). This repository covers
-only the **data preprocessing** responsibility: converting the source dataset
-into clean, model-ready raw text. Tokenization, model training, and evaluation
-are handled by other team members.
+Pipeline streaming để tiền xử lý văn bản tiếng Việt thô, thuộc đồ án cuối kỳ NLP
+của trường (next-token generation từ văn bản tiếng Việt thô). Repository này chỉ
+bao gồm phần **tiền xử lý dữ liệu**: biến dataset gốc thành văn bản thô sạch, sẵn
+sàng cho model. Tokenization, huấn luyện model và đánh giá do các thành viên
+khác trong nhóm đảm nhiệm.
 
-Source dataset: [VTSNLP/vietnamese_curated_dataset](https://huggingface.co/datasets/VTSNLP/vietnamese_curated_dataset)
+Dataset gốc: [VTSNLP/vietnamese_curated_dataset](https://huggingface.co/datasets/VTSNLP/vietnamese_curated_dataset)
 
-## 1. What the pipeline does
+## 1. Pipeline làm gì
 
-- Loads a Hugging Face dataset with **streaming** by default (never loads the
-  whole dataset into RAM).
-- Applies **conservative Vietnamese text cleaning** (see section 7).
-- Rejects unusable documents, recording a removal reason for every one.
-- Detects duplicate IDs and exact duplicate normalized texts (SHA-256 hashes).
-- Samples a deterministic subset with a seeded reservoir sampler (no naive
-  first-N bias).
-- Splits deterministically into train / validation / test (90 / 5 / 5 default).
-- Exports clean raw text as parquet + JSONL files, plus statistics, domain
-  distributions, removal counts, and before/after samples.
-- Saves the effective configuration with the outputs for reproducibility.
+- Tải Hugging Face dataset theo chế độ **streaming** mặc định (không bao giờ nạp
+  toàn bộ dataset vào RAM).
+- Áp dụng **làm sạch tiếng Việt thận trọng** (xem mục 7).
+- Loại bỏ văn bản không dùng được, ghi lý do loại bỏ cho từng văn bản.
+- Phát hiện trùng `id` và trùng văn bản chính xác sau chuẩn hóa (SHA-256 hash).
+- Lấy mẫu xác định bằng reservoir sampler có seed (không thiên lệch theo kiểu
+  chọn N văn bản đầu tiên).
+- Chia tập xác định thành train / validation / test (mặc định 90 / 5 / 5).
+- Xuất văn bản thô sạch thành tệp parquet + JSONL, kèm statistics, phân bố
+  domain, removal counts và mẫu trước/sau khi xử lý.
+- Lưu cấu hình hiệu dụng cùng đầu ra để tái lập được thí nghiệm.
 
-## 2. What it intentionally does not do
+## 2. Giới hạn
 
-- No tokenization, subword splitting, word segmentation, or `input_ids`.
-- No model training, fine-tuning, evaluation, perplexity, or generation.
-- No sequence chunking or context-window selection.
-- No lowercase-ing, accent removal, punctuation removal, stemming, or
-  lemmatization. Text stays raw: diacritics, capitalization, numbers, and
-  paragraph structure are preserved because they are useful for language
-  modelling.
+Pipeline **cố ý không làm** những việc sau:
 
-## 3. Installation
+- Không tokenization, subword splitting, word segmentation hay `input_ids`.
+- Không huấn luyện model, fine-tuning, đánh giá, perplexity hay generation.
+- Không sequence chunking hay chọn context window.
+- Không hạ chữ thường, bỏ dấu tiếng Việt, bỏ dấu câu, stemming hay lemmatization.
+- Văn bản giữ nguyên: dấu tiếng Việt, chữ hoa, số và cấu trúc đoạn đều được giữ
+  vì chúng hữu ích cho language modelling.
+
+## 3. Cài đặt
 
 ```bash
 python -m venv .venv
@@ -40,8 +41,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Requires Python 3.10+. Tests: `pip install pytest` (included in
-`requirements.txt`) then `python -m pytest`.
+Yêu cầu Python 3.10+. Chạy test: `pip install pytest` (đã có trong
+`requirements.txt`) rồi `python -m pytest`.
 
 ## 4. Smoke test
 
@@ -49,121 +50,121 @@ Requires Python 3.10+. Tests: `pip install pytest` (included in
 python -m src.data.preprocess --mode smoke --max-documents 2000 --seed 42
 ```
 
-The `smoke` mode targets ~2,000 accepted documents and scans at most 50,000
-source documents. Output goes to `data/processed/` by default. Add
-`--overwrite` to replace existing outputs.
+Chế độ `smoke` nhắm tới ~2.000 văn bản được chấp nhận và quét tối đa 50.000 văn
+bản nguồn. Đầu ra mặc định nằm trong `data/processed/`. Thêm `--overwrite` để
+ghi đè đầu ra cũ.
 
-## 5. Larger preprocessing jobs
+## 5. Chạy preprocessing quy mô lớn hơn
 
 ```bash
-# Development run (~20,000 documents)
+# Development run (~20.000 văn bản)
 python -m src.data.preprocess --mode development --seed 42
 
-# Final run (~50,000 documents, scans the whole stream)
+# Final run (~50.000 văn bản, quét toàn bộ stream)
 python -m src.data.preprocess --mode final --seed 42 --overwrite
 
-# Custom run: different dataset, no scan limit, tuned thresholds
+# Custom run: dataset khác, không giới hạn quét, tinh chỉnh threshold
 python -m src.data.preprocess --dataset VTSNLP/vietnamese_curated_dataset \
   --mode final --max-documents 50000 --scan-limit 0 \
   --min-chars 30 --max-chars 10000 --train-ratio 0.9 --val-ratio 0.05 \
   --output-dir data/processed --seed 42 --overwrite
 ```
 
-All options are visible with `python -m src.data.preprocess --help`.
+Mọi tùy chọn đều xem được bằng `python -m src.data.preprocess --help`.
 
-### Exact deduplication backends
+### Deduplication backend
 
-| Backend | State | Memory | Use when |
+| Backend | Trạng thái | Bộ nhớ | Dùng khi |
 | --- | --- | --- | --- |
-| `memory` (default) | two Python sets | ~126 MiB per 500k candidates, unbounded | bounded scans |
-| `sqlite` | on-disk SQLite with PRIMARY KEY columns, WAL, batched commits | flat in RAM; db file on disk | full-dataset scans |
+| `memory` (mặc định) | hai Python set | ~126 MiB mỗi 500k candidate, không chặn trên | scan giới hạn |
+| `sqlite` | SQLite trên đĩa, cột PRIMARY KEY, WAL, commit theo batch | RAM phẳng; tệp db nằm trên đĩa | scan toàn bộ dataset |
 
 ```bash
 python -m src.data.preprocess --mode final --dedup-backend sqlite --dedup-dir data/dedup
 ```
 
-Both backends make identical accept/reject decisions (verified: byte-identical
-outputs on smoke and 200k/500k scans). The sqlite database is created fresh
-per run, lives in `--dedup-dir`, and is deleted after a successful run unless
-`--keep-dedup-db` is given. The backend choice and database statistics are
-recorded in `manifest.json` (`dedup` key).
+Hai backend cho quyết định chấp nhận/loại bỏ giống hệt nhau (đã kiểm chứng: đầu
+ra byte-giống hệt trên smoke và scan 200k/500k). Database sqlite được tạo mới
+trong mỗi lần chạy, nằm trong `--dedup-dir`, và bị xóa sau khi chạy thành công
+trừ khi truyền `--keep-dedup-db`. Backend đã dùng và statistics của database
+được ghi trong `manifest.json` (key `dedup`).
 
-### Conservative rejection rules
+### Quy tắc loại bỏ thận trọng
 
-Four optional rules remove only clearly unusable text. Thresholds are visible
-in the configuration and every rejection is counted:
+Bốn quy tắc tùy chọn chỉ loại bỏ văn bản rõ ràng không dùng được. Threshold
+hiển thị trong cấu hình và mọi lần loại bỏ đều được đếm:
 
-| Rule | Default | Trigger (defaults) |
+| Rule | Mặc định | Điều kiện kích hoạt (mặc định) |
 | --- | --- | --- |
-| `encoding_corruption` | reject | >= 3 replacement characters (U+FFFD) |
-| `binary_or_invalid_content` | reject | >= 8 unusual Unicode chars AND >= 0.5% of chars (icon fonts, bidi marks, ZWSP soup) |
-| `foreign_script_dominant` | audit-only | non-Latin script (Armenian/Arabic/Greek/Cyrillic/CJK/...) >= 30% of chars |
-| `concatenated_dump` | audit-only | a single line > 20,000 characters |
+| `encoding_corruption` | reject | >= 3 ký tự thay thế (U+FFFD) |
+| `binary_or_invalid_content` | reject | >= 8 ký tự Unicode bất thường VÀ >= 0.5% tổng ký tự (icon font, bidi marks, ZWSP) |
+| `foreign_script_dominant` | audit-only | ký tự phi-Latin (Armenian/Arabic/Greek/Cyrillic/CJK/...) >= 30% |
+| `concatenated_dump` | audit-only | một dòng duy nhất > 20.000 ký tự |
 
-Disable or enable per rule with `--reject-encoding-corruption` /
-`--no-reject-encoding-corruption` (same pattern for the others).
+Bật/tắt từng rule bằng `--reject-encoding-corruption` /
+`--no-reject-encoding-corruption` (tương tự cho các rule khác).
 
-Deliberate non-decisions, all measured against real data:
+Các quyết định cố ý không làm, đều đã đo trên dữ liệu thật:
 
-- **VNI mojibake is audit-only.** Letter+question-mark patterns also appear in
-  JS ternaries, URL query strings, and no-space question marks, so automatic
-  VNI detection is unreliable (the corpus contains all three).
-- **Pure English is not rejected** by any rule (Latin script, no corruption
-  markers); it is flagged `very_low_vietnamese` in the review packet.
-- **Mixed Vietnamese-English is never rejected** for containing English.
-- **Long documents are never rejected for being long**; only the page-dump
-  signature triggers `concatenated_dump`.
-- **No automatic VNI-to-Unicode conversion** is attempted.
+- **VNI mojibake chỉ để audit.** Mẫu chữ-cái + dấu hỏi + chữ-cái cũng xuất hiện
+  trong JS ternary, URL query string và câu hỏi không có khoảng trắng, nên phát
+  hiện VNI tự động không đáng tin (corpus có cả ba dạng này).
+- **Tiếng Anh thuần không bị rule nào loại** (Latin script, không dấu hiệu hỏng);
+  nó được gắn cờ `very_low_vietnamese` trong review packet.
+- **Văn bản pha Việt-Anh không bao giờ bị loại** chỉ vì có tiếng Anh.
+- **Văn bản dài không bao giờ bị loại chỉ vì dài**; chỉ dấu hiệu page dump mới
+  kích hoạt `concatenated_dump`.
+- **Không tự động chuyển VNI sang Unicode.**
 
-Rejected documents are recorded (capped) in
-`samples/rejected_examples.csv` with id, domain, reason, and a truncated
-preview.
+Văn bản bị loại được ghi lại (giới hạn số lượng) trong
+`samples/rejected_examples.csv` với id, domain, lý do và preview rút gọn.
 
-### Pinning the dataset revision
+### Khóa revision của dataset
 
-Pass `--dataset-revision <commit-sha-or-tag>` to pin the exact dataset version.
-Every run also records the resolved revision in `manifest.json` so results can
-be compared across runs even without an explicit pin.
+Truyền `--dataset-revision <commit-sha-hoặc-tag>` để khóa đúng phiên bản
+dataset. Mỗi lần chạy cũng ghi revision đã phân giải trong `manifest.json` để
+đối chiếu kết quả giữa các lần chạy kể cả khi không khóa tường minh.
 
-### Quality audit (read-only)
+### Quality audit (chỉ đọc)
 
-After a run, audit the outputs without touching them:
+Sau khi chạy, kiểm định đầu ra mà không đụng vào chúng:
 
 ```bash
 python -m src.data.audit --output-dir data/processed --audit-dir data/audit \
   --seed 42 --near-duplicates
 ```
 
-Produces per-document quality signals, extreme-metric review samples, domain
-drift (inspected -> accepted -> retained -> splits), length-outlier previews,
-and (with `--near-duplicates`) a SimHash near-duplicate report. The audit
-flags documents; it never removes or modifies them.
+Sinh ra quality signal cho từng văn bản, mẫu duyệt theo chỉ số cực trị, domain
+drift (inspected -> accepted -> retained -> split), preview văn bản dài bất
+thường, và (với `--near-duplicates`) báo cáo near-duplicate bằng SimHash. Audit
+chỉ gắn cờ, không bao giờ loại bỏ hay sửa dữ liệu.
 
-### Manual review packet
+### Review packet thủ công
 
-The audit also exports every flagged document to `data/review/`:
+Audit cũng xuất mọi văn bản bị gắn cờ vào `data/review/`:
 
-- `quality_review.csv` - all metrics plus a truncated preview
-- `quality_review.html` - readable HTML table
-- `quality_review_decisions.template.csv` - fill-in template with
-  `proposed_decision`, empty `human_decision` and `reviewer_notes` columns
+- `quality_review.csv` - mọi chỉ số kèm preview rút gọn
+- `quality_review.html` - bảng HTML dễ đọc
+- `quality_review_decisions.template.csv` - template điền tay với cột
+  `proposed_decision`, cột `human_decision` và `reviewer_notes` để trống
 
-802 of 20,000 development documents were flagged (4.0%); 50 proposed rejects.
-The language-quality thresholds (`--min-non-latin-share`, VNI handling) must
-be finalized from human review of this packet, not from automatic detection.
+802 trên 20.000 văn bản development bị gắn cờ (4.0%); 50 văn bản được đề xuất
+loại. Các threshold về ngôn ngữ (`--min-non-latin-share`, xử lý VNI) phải được
+chốt dựa trên kết quả duyệt thủ công packet này, không dựa vào phát hiện tự
+động.
 
-### Modes
+### Các chế độ
 
-| Mode | Accepted docs | Source scan limit |
+| Mode | Số văn bản chấp nhận | Giới hạn quét nguồn |
 | --- | --- | --- |
-| `smoke` | 2,000 | 50,000 |
-| `development` | 20,000 | 500,000 |
-| `final` | 50,000 | unlimited (whole stream) |
+| `smoke` | 2.000 | 50.000 |
+| `development` | 20.000 | 500.000 |
+| `final` | 50.000 | không giới hạn (toàn bộ stream) |
 
-Values are defaults, not hard-coded: `--max-documents` and `--scan-limit`
-override them. `--scan-limit 0` means unlimited.
+Các giá trị này là mặc định, không hard-code: `--max-documents` và
+`--scan-limit` ghi đè được. `--scan-limit 0` nghĩa là không giới hạn.
 
-## 6. Output file formats
+## 6. Định dạng tệp đầu ra
 
 ```
 data/processed/
@@ -171,90 +172,94 @@ data/processed/
 │   ├── train.parquet        # id, domain, text, text_hash, character_count
 │   ├── validation.parquet
 │   ├── test.parquet
-│   ├── train.txt            # JSONL: one JSON-escaped document per line
+│   ├── train.txt            # JSONL: mỗi dòng là một văn bản JSON-escaped
 │   ├── validation.txt
 │   └── test.txt
 ├── statistics/
-│   ├── preprocessing_stats.json   # effective config, counts, split counts
-│   ├── domain_distribution.csv    # inspected vs accepted per domain
-│   ├── removal_counts.csv         # every rejection reason, counted
+│   ├── preprocessing_stats.json   # config hiệu dụng, số đếm, split counts
+│   ├── domain_distribution.csv    # inspected vs accepted theo domain
+│   ├── removal_counts.csv         # mọi lý do loại bỏ, đều được đếm
 │   └── length_statistics.json     # min/max/mean/median/p90/p95/p99
 └── samples/
-    └── before_after_examples.csv  # truncated display pairs (10 by default)
+    └── before_after_examples.csv  # cặp mẫu rút gọn (mặc định 10)
 ```
 
-Plus `manifest.json` beside `processed/`: dataset name, requested and resolved
-revision, seed, effective configuration, Python/dependency versions, git
-commit (when the repo has one), per-file SHA-256 checksums, row counts, and
-runtime. See `docs/data_contract.md` for the full handoff contract.
+Kèm theo `manifest.json` cạnh `processed/`: tên dataset, revision yêu cầu và đã
+phân giải, seed, cấu hình hiệu dụng, phiên bản Python/các dependency, git
+commit (khi repo có commit), SHA-256 checksum từng tệp, row count và thời gian
+chạy. Xem `docs/data_contract.md` để biết hợp đồng bàn giao đầy đủ.
 
-The `.txt` files are **JSONL** (one JSON-escaped document per line). This is
-deliberate: raw text contains newlines and blank lines, so a plain-text format
-could not separate documents reliably. Downstream readers load each line and
-`json.loads` it; multiline documents round-trip exactly. The `.parquet` files
-carry the same text plus metadata (`text_hash`, `character_count`).
+Các tệp `.txt` là **JSONL** (mỗi dòng là một văn bản JSON-escaped). Đây là chủ
+đích: văn bản thô chứa dấu xuống dòng và dòng trống, nên định dạng plain text
+không thể tách văn bản một cách đáng tin. Phía downstream đọc từng dòng rồi
+`json.loads`; văn bản nhiều dòng round-trip chính xác. Các tệp `.parquet` chứa
+cùng văn bản kèm metadata (`text_hash`, `character_count`).
 
-## 7. Cleaning rules
+## 7. Quy tắc làm sạch
 
-Reject:
-- missing or whitespace-only text (`empty_text`)
-- text with no meaningful content, i.e. no letter or digit (`invalid_text`)
-- text shorter than `--min-chars` (default 20) (`too_short`)
-- text longer than `--max-chars`, when set (`too_long`)
-- duplicate `id` values (`duplicate_id`)
-- exact duplicate normalized texts (`duplicate_text`)
+Loại bỏ:
 
-Normalize:
-- Unicode to NFC (Vietnamese diacritics preserved)
-- line endings to LF (`\r\n` / `\r` -> `\n`)
-- repeated spaces -> single space, tabs -> space
-- at most one consecutive blank line (paragraph boundaries preserved)
-- trim leading/trailing whitespace, strip trailing spaces per line
+- văn bản thiếu hoặc chỉ có khoảng trắng (`empty_text`)
+- văn bản không có nội dung có nghĩa, tức không có chữ cái hay chữ số
+  (`invalid_text`)
+- văn bản ngắn hơn `--min-chars` (mặc định 20) (`too_short`)
+- văn bản dài hơn `--max-chars`, khi có đặt (`too_long`)
+- trùng giá trị `id` (`duplicate_id`)
+- trùng văn bản chính xác sau chuẩn hóa (`duplicate_text`)
 
-Keep:
-- punctuation, capitalization, numbers, paragraph structure, all valid
-  Vietnamese/Unicode symbols. Control characters are removed; LF and tab stay.
+Chuẩn hóa:
 
-Every rejected document increments a named counter, so nothing is discarded
-silently.
+- Unicode về NFC (dấu tiếng Việt được giữ nguyên)
+- kết thúc dòng về LF (`\r\n` / `\r` -> `\n`)
+- khoảng trắng lặp về một khoảng trắng, tab thành khoảng trắng
+- tối đa một dòng trống liên tiếp (ranh giới đoạn văn được giữ)
+- cắt khoảng trắng đầu/cuối, bỏ khoảng trắng cuối mỗi dòng
 
-## 8. Splitting method
+Giữ nguyên:
 
-Each accepted document is assigned a split with a **stable hash**:
+- dấu câu, chữ hoa, số, cấu trúc đoạn và mọi ký hiệu Unicode tiếng Việt hợp lệ.
+- Ký tự điều khiển bị bỏ; LF và tab được giữ.
+
+Mỗi văn bản bị loại đều tăng một bộ đếm có tên, nên không có gì bị bỏ âm thầm.
+
+## 8. Phương pháp chia tập
+
+Mỗi văn bản được chấp nhận được gán vào một split bằng **stable hash**:
 
 ```python
 value = sha256("split|{seed}|{doc_id}") / 2^64
-train        if value < train_ratio
-validation   if value < train_ratio + val_ratio
-test         otherwise
+train        nếu value < train_ratio
+validation   nếu value < train_ratio + val_ratio
+test         ngược lại
 ```
 
-The same document always lands in the same split for a given seed, across runs
-and machines. Duplicates are removed before splitting, so no ID or normalized
-text appears in two splits. Ratios default to 90 / 5 / 5.
+Cùng một văn bản luôn vào cùng một split với cùng seed, qua mọi lần chạy và mọi
+máy. Duplicate bị loại trước khi chia tập, nên không có id hay văn bản chuẩn
+hóa nào xuất hiện ở hai split. Tỷ lệ mặc định là 90 / 5 / 5.
 
-## 9. Known limitations
+## 9. Các giới hạn đã biết
 
-- **Sampling:** the reservoir sampler is uniform over everything it scans. With
-  a scan limit (smoke/development) the sample is uniform over that prefix, which
-  may not represent the whole dataset. `final` scans the whole stream. Domain
-  stratification is not guaranteed; the inspected vs accepted domain
-  distribution is recorded so bias is visible, not hidden.
-- **Deduplication scope:** duplicate hashes are tracked for every accepted
-  candidate within the scanned range. Whole-dataset runs keep hashes in memory;
-  very large runs use more RAM (one 32-byte digest per candidate).
-- **Determinism:** results are stable given the same dataset version and seed.
-  Hugging Face streaming order is fixed per dataset version, but a dataset
-  update can change sampling results.
-- **Streaming fallback:** if the stream yields fewer usable documents than the
-  target, the run succeeds with fewer accepted documents and prints a warning.
+- **Lấy mẫu:** reservoir sampler đồng đều trên mọi thứ nó quét. Khi có giới hạn
+  quét (smoke/development), mẫu đồng đều trên phần prefix đó, có thể không đại
+  diện cho toàn bộ dataset. `final` quét toàn bộ stream. Không đảm bảo phân
+  tầng theo domain; phân bố inspected vs accepted được ghi lại để thiên lệch
+  hiện ra, không bị giấu.
+- **Phạm vi khử trùng:** hash trùng lặp được theo dõi cho mọi candidate được
+  chấp nhận trong phạm vi quét. Chạy toàn dataset với backend `memory` giữ hash
+  trong RAM; scan rất lớn sẽ dùng nhiều RAM hơn (32 byte cho mỗi candidate).
+  Dùng `--dedup-backend sqlite` cho scan toàn bộ dataset.
+- **Tính xác định:** kết quả ổn định với cùng phiên bản dataset và seed. Thứ tự
+  streaming của Hugging Face cố định theo phiên bản dataset, nhưng nếu dataset
+  được cập nhật thì kết quả lấy mẫu có thể đổi.
+- **Fallback khi stream ngắn:** nếu stream có ít văn bản dùng được hơn mục tiêu,
+  lần chạy vẫn thành công với số văn bản ít hơn và in cảnh báo.
 
-## 10. Consuming the output (tokenizer / model teammates)
+## 10. Sử dụng đầu ra (cho teammate làm tokenizer / model)
 
-- **Raw text:** read the `.txt` files line by line; `json.loads` each line to
-  get one document. Feed this directly into your tokenizer.
-- **Metadata:** the `.parquet` files carry `id`, `domain`, `text_hash`, and
-  `character_count` alongside the text, for lineage and filtering.
-- Splits are guaranteed disjoint by both `id` and normalized text. Use
-  `train.parquet` / `train.txt`, `validation.*`, `test.*` as-is.
-- Do not re-clean: text is already NFC-normalized and deduplicated.
+- **Văn bản thô:** đọc từng dòng trong tệp `.txt`; `json.loads` mỗi dòng để lấy
+  một văn bản hoàn chỉnh. Đưa thẳng vào tokenizer của bạn.
+- **Metadata:** tệp `.parquet` chứa `id`, `domain`, `text_hash` và
+  `character_count` bên cạnh văn bản, dùng để truy vết và lọc.
+- Các split được đảm bảo rời nhau theo cả `id` lẫn văn bản chuẩn hóa. Dùng
+  `train.parquet` / `train.txt`, `validation.*`, `test.*` nguyên trạng.
+- Không làm sạch lại: văn bản đã NFC-normalized và khử trùng lặp.
