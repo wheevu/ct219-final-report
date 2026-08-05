@@ -1,0 +1,19 @@
+[project]
+name = "vietnamese-nlp-preprocess"
+version = "0.1.0"
+description = "Streaming preprocessing pipeline for raw Vietnamese text (next-token generation project)"
+requires-python = ">=3.10"
+dependencies = [
+    "datasets>=2.18,<4.0",
+    "pyarrow>=14.0",
+    "pandas>=2.0,<3.0",
+    "tqdm>=4.66,<5.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4,<9.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
