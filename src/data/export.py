@@ -25,6 +25,35 @@ PARQUET_SCHEMA = pa.schema([
 
 SPLIT_NAMES = ("train", "validation", "test")
 
+# Name of the completion marker written last by a successful run. A release
+# without this file (or with a manifest whose status is not "complete") is
+# treated as interrupted and never served as valid.
+RELEASE_COMPLETE = "RELEASE_COMPLETE"
+
+
+def release_status(output_dir: Path) -> str:
+    """'complete', 'incomplete', or 'missing' for a release directory.
+
+    complete   -> marker file exists and manifest status is "complete".
+    incomplete -> outputs or manifest exist without a valid marker.
+    missing    -> nothing was written yet.
+    """
+    marker = output_dir / RELEASE_COMPLETE
+    manifest_path = output_dir / "manifest.json"
+    if marker.exists() and manifest_path.exists():
+        try:
+            import json
+
+            status = json.loads(manifest_path.read_text("utf-8")).get("status")
+        except (OSError, ValueError):
+            status = None
+        if status == "complete":
+            return "complete"
+    has_outputs = any(p.exists() for p in expected_output_files(output_dir))
+    if has_outputs or manifest_path.exists() or marker.exists():
+        return "incomplete"
+    return "missing"
+
 
 def truncate_for_display(text: str, limit: int = 200) -> str:
     """Truncate a sample for display without touching the exported data."""
@@ -137,4 +166,20 @@ def expected_output_files(output_dir: Path) -> list[Path]:
         output_dir / "statistics" / "length_statistics.json",
         output_dir / "samples" / "before_after_examples.csv",
         output_dir / "samples" / "rejected_examples.csv",
+        output_dir / RELEASE_COMPLETE,
     ]
+
+
+def sweep_stale_temp_files(*directories: Path) -> int:
+    """Remove leftover writer temp files ('.<name>.<rand>.tmp') from crashed runs."""
+    removed = 0
+    for directory in directories:
+        if not directory.exists():
+            continue
+        for path in directory.glob(".*.tmp"):
+            try:
+                path.unlink()
+                removed += 1
+            except OSError:
+                pass
+    return removed

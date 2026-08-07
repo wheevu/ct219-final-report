@@ -20,10 +20,13 @@ from .cleaning import ALL_REASONS, inspect_document
 from .config import Settings, settings_from_args
 from .dedup import open_dedup
 from .export import (
+    RELEASE_COMPLETE,
     AtomicTextWriter,
     ParquetSplitWriter,
     SPLIT_NAMES,
+    atomic_write_bytes,
     expected_output_files,
+    sweep_stale_temp_files,
     truncate_for_display,
     write_csv,
     write_json,
@@ -72,7 +75,21 @@ def _write_rejected_examples(path: Path, rejected_examples: dict[str, list[dict]
 
 
 def load_documents(settings: Settings) -> Iterable[dict]:
-    """Load the dataset iterable (streaming by default)."""
+    """Load the dataset iterable (streaming by default).
+
+    Two loaders:
+    - "datasets": Hugging Face `datasets` streaming (default).
+    - "shards": shard-by-shard download/process/delete for very large
+      datasets that do not fit on disk; requires a pinned revision.
+    """
+    if settings.loader == "shards":
+        from .shard_loader import yield_rows
+
+        return yield_rows(
+            settings.dataset,
+            settings.dataset_revision,
+            Path(settings.cache_dir),
+        )
     try:
         from datasets import load_dataset
 
@@ -91,6 +108,7 @@ def load_documents(settings: Settings) -> Iterable[dict]:
 
 
 def run_pipeline(settings: Settings) -> dict:
+    settings = settings.resolve_mode()
     settings.validate()
     output_dir = Path(settings.output_dir)
     processed_dir = output_dir / "processed"
@@ -105,6 +123,12 @@ def run_pipeline(settings: Settings) -> dict:
         )
     for directory in (processed_dir, stats_dir, samples_dir):
         directory.mkdir(parents=True, exist_ok=True)
+    # A rerun starts from a clean slate: remove the previous completion marker
+    # so an interrupted rerun can never look complete.
+    marker = output_dir / RELEASE_COMPLETE
+    if marker.exists():
+        marker.unlink()
+    sweep_stale_temp_files(processed_dir, stats_dir, samples_dir)
 
     started = time.time()
     resolved_revision = resolve_dataset_revision(
@@ -213,7 +237,6 @@ def run_pipeline(settings: Settings) -> dict:
     removal = counters.snapshot()
     dedup_stats = dedup.stats()
     dedup.close()
-
     # ------------------------- statistics outputs -------------------------
     stats = {
         "config": settings.effective(),
@@ -279,6 +302,10 @@ def run_pipeline(settings: Settings) -> dict:
         hashes_retained=dedup_stats["hashes_retained"],
     )
     write_manifest(manifest, output_dir)
+    # Completion marker: written last, so a release is only "complete" when
+    # every output AND the manifest are on disk. An interrupted run leaves
+    # outputs without the marker and is detected as incomplete.
+    atomic_write_bytes(marker, b"complete\n")
 
     # ------------------------------ summary -------------------------------
     print(f"\nscanning finished: {scanned} source documents inspected, "
@@ -306,7 +333,8 @@ def main(argv: list[str] | None = None) -> int:
     settings = settings_from_args(argv)
     try:
         run_pipeline(settings)
-    except (FileExistsError, RuntimeError, ValueError) as exc:
+    except (FileExistsError, RuntimeError, ValueError, OSError) as exc:
+        # OSError covers disk-full and interrupted writes; report clearly.
         print(f"error: {exc}", file=sys.stderr)
         return 1
     return 0

@@ -110,6 +110,7 @@ def build_manifest(
 ) -> dict:
     """Assemble the full reproducibility manifest."""
     manifest = {
+        "status": "complete",
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "dataset": settings.dataset,
         "requested_dataset_revision": settings.dataset_revision,
@@ -123,8 +124,10 @@ def build_manifest(
         "environment": environment_info(),
         "performance": {
             "runtime_seconds": round(runtime_seconds, 1),
-            "source_documents_per_second": round(docs_per_second, 1),
-            "accepted_documents_per_second": round(accepted_per_second, 1),
+            "source_documents_per_second": (
+                round(docs_per_second, 1) if docs_per_second is not None else None),
+            "accepted_documents_per_second": (
+                round(accepted_per_second, 1) if accepted_per_second is not None else None),
             "peak_memory_mb": peak_memory_mb,
             "hashes_retained_in_memory": hashes_retained,
         },

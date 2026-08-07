@@ -6,11 +6,22 @@ import argparse
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-# Number of accepted documents targeted by each run mode.
-MODE_DEFAULTS: dict[str, dict[str, int]] = {
+# Named run modes. Each mode provides defaults for max_documents, scan_limit,
+# and (optionally) the dedup backend; explicit CLI flags override them.
+MODE_DEFAULTS: dict[str, dict[str, int | None | str]] = {
     "smoke": {"max_documents": 2000, "scan_limit": 50_000},
     "development": {"max_documents": 20_000, "scan_limit": 500_000},
     "final": {"max_documents": 50_000, "scan_limit": None},
+    # The 400k release: full-stream scan, exactly 400,000 retained documents,
+    # on-disk deduplication so the ~12M-candidate hash population never lives
+    # in RAM. Expected splits: ~360k / 20k / 20k (hash-based, small deviation
+    # allowed; documents are never moved between splits).
+    "release-400k": {
+        "max_documents": 400_000,
+        "scan_limit": None,
+        "dedup_backend": "sqlite",
+        "loader": "shards",
+    },
 }
 
 MODE_ALIASES = {"dev": "development", "devtest": "development"}
@@ -42,9 +53,12 @@ class Settings:
     simhash_threshold: int = 3
     shingle_size: int = 4
     chart: str = "docs/assets/domain_distribution.svg"
-    dedup_backend: str = "memory"
+    subset: int = 0  # audit: deterministic bounded subset (0 = all)
+    dedup_backend: str | None = None  # None = resolved from mode (memory default)
     dedup_dir: str = "data/dedup"
     keep_dedup_db: bool = False
+    loader: str | None = None  # None = resolved from mode ('datasets' default)
+    cache_dir: str = "data/cache/shards"
     rejected_sample_size: int = 20
     reject_encoding_corruption: bool = True
     reject_binary_invalid: bool = True
@@ -72,6 +86,10 @@ class Settings:
             values["scan_limit"] = None  # 0 = unlimited
         elif self.scan_limit is None:
             values["scan_limit"] = defaults["scan_limit"]
+        if values["dedup_backend"] is None:
+            values["dedup_backend"] = defaults.get("dedup_backend", "memory")
+        if values["loader"] is None:
+            values["loader"] = defaults.get("loader", "datasets")
         return Settings(**values)
 
     def effective(self) -> dict:
@@ -141,6 +159,12 @@ def build_parser() -> argparse.ArgumentParser:
                         help="exact-deduplication backend; sqlite scales to full scans")
     parser.add_argument("--dedup-dir", default=Settings.dedup_dir,
                         help="working directory for the sqlite dedup database")
+    parser.add_argument("--loader", default=Settings.loader,
+                        choices=("datasets", "shards"),
+                        help="row loader: datasets streaming, or shard-by-shard "
+                             "download/process/delete for very large datasets")
+    parser.add_argument("--cache-dir", default=Settings.cache_dir,
+                        help="scratch directory for the shard loader")
     parser.add_argument("--keep-dedup-db", action="store_true",
                         help="keep the sqlite dedup database after a successful run")
     parser.add_argument("--rejected-sample-size", type=int, default=Settings.rejected_sample_size,
@@ -198,6 +222,8 @@ def settings_from_args(argv: list[str] | None = None) -> Settings:
         dedup_backend=args.dedup_backend,
         dedup_dir=args.dedup_dir,
         keep_dedup_db=args.keep_dedup_db,
+        loader=args.loader,
+        cache_dir=args.cache_dir,
         rejected_sample_size=args.rejected_sample_size,
         reject_encoding_corruption=args.reject_encoding_corruption,
         reject_binary_invalid=args.reject_binary_invalid,
