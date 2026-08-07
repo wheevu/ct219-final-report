@@ -8,61 +8,61 @@
 <text x="178.0" y="81.0" font-size="12" font-family="sans-serif" text-anchor="end">Arts_and_Entertainment</text>
 <rect x="190.0" y="70.0" width="509.1" height="9.0" fill="#8fa8bf"/>
 <rect x="190.0" y="84.0" width="509.1" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="98.0" width="495.9" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="81.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.20pp</text>
+<rect x="190.0" y="98.0" width="507.9" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="81.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.02pp</text>
 <text x="178.0" y="133.0" font-size="12" font-family="sans-serif" text-anchor="end">Health</text>
-<rect x="190.0" y="122.0" width="464.8" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="136.0" width="464.8" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="150.0" width="484.5" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="133.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.30pp</text>
+<rect x="190.0" y="122.0" width="479.6" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="136.0" width="479.9" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="150.0" width="474.5" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="133.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.08pp</text>
 <text x="178.0" y="185.0" font-size="12" font-family="sans-serif" text-anchor="end">People_and_Society</text>
-<rect x="190.0" y="174.0" width="443.9" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="188.0" width="443.9" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="202.0" width="448.0" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="185.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.06pp</text>
-<text x="178.0" y="237.0" font-size="12" font-family="sans-serif" text-anchor="end">Sensitive_Subjects</text>
-<rect x="190.0" y="226.0" width="443.2" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="240.0" width="443.2" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="254.0" width="436.3" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="237.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.11pp</text>
-<text x="178.0" y="289.0" font-size="12" font-family="sans-serif" text-anchor="end">Sports</text>
-<rect x="190.0" y="278.0" width="427.5" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="292.0" width="427.5" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="306.0" width="430.4" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="289.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.05pp</text>
-<text x="178.0" y="341.0" font-size="12" font-family="sans-serif" text-anchor="end">News</text>
-<rect x="190.0" y="330.0" width="423.1" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="344.0" width="423.1" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="358.0" width="428.5" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="341.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.08pp</text>
+<rect x="190.0" y="174.0" width="456.3" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="188.0" width="456.2" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="202.0" width="455.6" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="185.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.01pp</text>
+<text x="178.0" y="237.0" font-size="12" font-family="sans-serif" text-anchor="end">Sports</text>
+<rect x="190.0" y="226.0" width="429.1" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="240.0" width="429.6" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="254.0" width="429.3" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="237.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.00pp</text>
+<text x="178.0" y="289.0" font-size="12" font-family="sans-serif" text-anchor="end">News</text>
+<rect x="190.0" y="278.0" width="416.2" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="292.0" width="416.0" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="306.0" width="417.7" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="289.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.02pp</text>
+<text x="178.0" y="341.0" font-size="12" font-family="sans-serif" text-anchor="end">Sensitive_Subjects</text>
+<rect x="190.0" y="330.0" width="402.2" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="344.0" width="402.8" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="358.0" width="405.1" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="341.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.04pp</text>
 <text x="178.0" y="393.0" font-size="12" font-family="sans-serif" text-anchor="end">Food_and_Drink</text>
-<rect x="190.0" y="382.0" width="362.1" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="396.0" width="362.1" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="410.0" width="364.0" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="393.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.03pp</text>
+<rect x="190.0" y="382.0" width="365.4" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="396.0" width="365.8" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="410.0" width="366.3" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="393.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.01pp</text>
 <text x="178.0" y="445.0" font-size="12" font-family="sans-serif" text-anchor="end">Business_and_Industrial</text>
-<rect x="190.0" y="434.0" width="335.5" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="448.0" width="335.5" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="462.0" width="341.1" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="445.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.09pp</text>
+<rect x="190.0" y="434.0" width="338.1" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="448.0" width="338.2" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="462.0" width="338.1" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="445.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.00pp</text>
 <text x="178.0" y="497.0" font-size="12" font-family="sans-serif" text-anchor="end">Travel_and_Transportation</text>
-<rect x="190.0" y="486.0" width="311.4" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="500.0" width="311.4" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="514.0" width="310.8" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="497.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.01pp</text>
+<rect x="190.0" y="486.0" width="314.7" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="500.0" width="314.9" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="514.0" width="311.7" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="497.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.04pp</text>
 <text x="178.0" y="549.0" font-size="12" font-family="sans-serif" text-anchor="end">Jobs_and_Education</text>
-<rect x="190.0" y="538.0" width="299.0" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="552.0" width="299.0" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="566.0" width="298.1" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="549.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.01pp</text>
-<text x="178.0" y="601.0" font-size="12" font-family="sans-serif" text-anchor="end">Home_and_Garden</text>
-<rect x="190.0" y="590.0" width="269.0" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="604.0" width="269.0" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="618.0" width="286.1" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="601.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.26pp</text>
-<text x="178.0" y="653.0" font-size="12" font-family="sans-serif" text-anchor="end">Beauty_and_Fitness</text>
-<rect x="190.0" y="642.0" width="288.9" height="9.0" fill="#8fa8bf"/>
-<rect x="190.0" y="656.0" width="288.9" height="9.0" fill="#c9a26b"/>
-<rect x="190.0" y="670.0" width="278.6" height="9.0" fill="#5b8a72"/>
-<text x="758.0" y="653.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.16pp</text>
+<rect x="190.0" y="538.0" width="305.4" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="552.0" width="305.4" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="566.0" width="307.3" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="549.0" font-size="11" font-family="sans-serif" fill="#666">drift +0.03pp</text>
+<text x="178.0" y="601.0" font-size="12" font-family="sans-serif" text-anchor="end">Beauty_and_Fitness</text>
+<rect x="190.0" y="590.0" width="300.6" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="604.0" width="300.9" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="618.0" width="299.3" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="601.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.02pp</text>
+<text x="178.0" y="653.0" font-size="12" font-family="sans-serif" text-anchor="end">Home_and_Garden</text>
+<rect x="190.0" y="642.0" width="286.5" height="9.0" fill="#8fa8bf"/>
+<rect x="190.0" y="656.0" width="286.8" height="9.0" fill="#c9a26b"/>
+<rect x="190.0" y="670.0" width="284.0" height="9.0" fill="#5b8a72"/>
+<text x="758.0" y="653.0" font-size="11" font-family="sans-serif" fill="#666">drift -0.04pp</text>
 </svg>
