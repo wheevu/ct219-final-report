@@ -473,7 +473,16 @@ def run_audit(settings: Settings) -> dict:
 
     started = time.time()
     rows = load_rows(processed_dir)
-    print(f"auditing {len(rows)} accepted documents")
+    total_rows = len(rows)
+    if settings.subset and total_rows > settings.subset:
+        # Deterministic subset: documents with the smallest hash scores,
+        # so the population audited is reproducible and unbiased.
+        rows = sorted(
+            rows,
+            key=lambda r: stable_float("audit_subset", settings.seed, r["id"]),
+        )[: settings.subset]
+    print(f"auditing {len(rows)} accepted documents "
+          f"(of {total_rows} total; subset={settings.subset or 'all'})")
 
     for row in tqdm(rows, desc="signals", unit="docs"):
         row["signals"] = compute_quality_signals(row["text"])
@@ -536,6 +545,8 @@ def run_audit(settings: Settings) -> dict:
 
     summary = {
         "documents_audited": len(rows),
+        "total_documents": total_rows,
+        "subset": settings.subset or None,
         "sample_counts": dict(Counter(s["reasons"] for s in samples)),
         "longest_document_chars": max((r["signals"]["character_count"] for r in rows), default=None),
         "median_character_count": median(
@@ -602,6 +613,10 @@ def build_audit_parser():
                         help="path for the domain-distribution chart (SVG)")
     parser.add_argument("--review-dir", default="data/review",
                         help="directory for the manual review packet")
+    parser.add_argument("--subset", type=int, default=0,
+                        help="audit only this many deterministically selected "
+                             "documents (0 = all); near-duplicate auditing can "
+                             "use a bounded subset for very large releases")
     return parser
 
 
@@ -617,6 +632,7 @@ def main(argv: list[str] | None = None) -> int:
         shingle_size=args.shingle_size,
         chart=args.chart,
         review_dir=args.review_dir,
+        subset=args.subset,
     )
     try:
         run_audit(settings)

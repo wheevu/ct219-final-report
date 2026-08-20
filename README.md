@@ -160,6 +160,7 @@ chốt dựa trên kết quả duyệt thủ công packet này, không dựa và
 | `smoke` | 2.000 | 50.000 |
 | `development` | 20.000 | 500.000 |
 | `final` | 50.000 | không giới hạn (toàn bộ stream) |
+| `release-400k` | 400.000 | không giới hạn; dedup sqlite, loader shard-by-shard |
 
 Các giá trị này là mặc định, không hard-code: `--max-documents` và
 `--scan-limit` ghi đè được. `--scan-limit 0` nghĩa là không giới hạn.

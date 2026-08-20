@@ -128,6 +128,82 @@ seed. Kết quả chạy 500.000: train 17.977 / validation 1.013 / test 1.010
 - Kích thước đầu ra: train.parquet 50 MB / train.txt 97 MB; validation ~2.8/5.7
   MB; test ~2.7/5.6 MB.
 
+## Release 400k (ct219-400k-v1)
+
+### Lệnh chạy
+
+```bash
+HF_HUB_DISABLE_XET=1 HF_HUB_DOWNLOAD_TIMEOUT=120 \
+  .venv/bin/python -u -m src.data.preprocess \
+  --mode release-400k \
+  --dataset-revision b81fcce58945970117a1b56d50ec81be2628a5c3 \
+  --seed 42 --output-dir data/releases/ct219-400k-v1 \
+  --dedup-dir data/releases/dedup-400k --cache-dir data/cache/shards
+```
+
+Chế độ `release-400k`: 400.000 văn bản giữ, quét toàn bộ stream, dedup sqlite,
+loader shard-by-shard (dataset nguồn ~34,65 GB / 132 shard không đủ chỗ đĩa
+nên tải từng shard, xử lý rồi xóa; 2 lần chạy thử đầu chết vì lỗi mạng HF
+(read timeout, peer closed) - chạy lại an toàn vì mọi thứ xác định).
+
+### Kết quả đo được
+
+- Văn bản nguồn đã duyệt: **12.169.131** (toàn bộ stream, 132 shard).
+- Chấp nhận: 400.000; candidate hợp lệ: 12.137.321; sampled out: 11.737.321.
+- Loại bỏ: **31.810** (encoding_corruption 14.650, binary_or_invalid_content
+  16.499, duplicate_text 661; không trùng id).
+- Split: **train 359.988 / validation 20.028 / test 19.984** (kỳ vọng
+  360.000/20.000/20.000; chênh lệch do băm, không ép số).
+- Thời gian: 28.777,5 giây (~8 giờ); 422,9 văn bản/s nguồn, 13,9 văn bản/s
+  chấp nhận; RSS đỉnh ~4.302 MiB.
+- SQLite: 2,63 GB trên đĩa (12.137.321 id + 12.137.321 hash), WAL, đã dọn
+  sau khi thành công.
+- Độ dài: min 202, max 417.047, trung bình 4.105, trung vị 2.763, p90 7.785,
+  p95 8.201, p99 8.695.
+- Đầu ra: train.parquet 1.044 MB / train.txt 1.936 MB; validation 58/108 MB;
+  test 58/108 MB. 25 domain.
+- Git commit của mã nguồn lúc chạy: `1afd4fa`; revision nguồn đã khóa:
+  `b81fcce58945970117a1b56d50ec81be2628a5c3`.
+- Lần chạy thử đầu tiên chết vì `httpx.ReadTimeout`, lần thứ hai vì
+  `peer closed connection` khi tải shard qua streaming datasets; sau đó chuyển
+  sang shard loader (hf_hub_download có resume + retry) và hoàn tất.
+
+### Kiểm định (phase 6)
+
+- `python -m src.data.release --output-dir data/releases/ct219-400k-v1`:
+  **400.000 dòng, checksum khớp manifest, round-trip JSONL chính xác, 0 trùng
+  id, 0 trùng hash, 0 chồng lấn giữa các split, 0 tệp tạm**, trạng thái
+  complete (marker + manifest status).
+- Audit toàn bộ 400.000 văn bản: 16.600 văn bản gắn cờ (4,15%), 5 đề xuất
+  loại, 16.595 chỉ cần duyệt. Tín hiệu chính: unusual_unicode 13.347 (ZWSP/bidi
+  rải rác), low_vietnamese 1.734, very_low_vietnamese 334, replacement_chars
+  482, vni_pattern 404, concatenated_dump 165, foreign_script 152,
+  low_alpha 851, extreme_length_few_lines 40.
+- Near-duplicate (SimHash, subset xác định 20.000 văn bản, ngưỡng Hamming
+  <= 3): **3 cặp, 0 cặp vượt split**; cả 3 đều là trang dùng chung template
+  (Zippo/GEVENA cùng cửa hàng, tin rao xe sanotovietnam.com.vn và ban-oto.com),
+  không phải trùng nội dung. Dân số thực tế được audit: 20.000/400.000.
+- Review packet: `data/review-release-400k/` (16.600 văn bản, cột quyết định
+  của người để trống).
+
+### Đăng tải Hugging Face dataset
+
+- Repo đề xuất: `wheevu/ct219-vietnamese-raw-400k` (repo_type=dataset, private
+  mặc định, không khai báo licence vì nguồn không có).
+- **Chưa thể đăng tải**: token hiện có (`nlp-project`) có role **read**, bị
+  hub từ chối tạo repo (403 Forbidden). Đã chuẩn bị sẵn card, checksums.txt,
+  data_contract.md, script và lệnh xác minh; cần token write để chạy:
+  `python scripts/hf_release.py dataset --release-dir data/releases/ct219-400k-v1`
+  rồi `python scripts/hf_release.py verify-dataset --release-dir data/releases/ct219-400k-v1`.
+
+### Model
+
+- **Không có checkpoint hợp lệ** cho model next-token: không có mã huấn luyện
+  trong repo; chỉ tìm thấy model NER của bài tập W07 (không phù hợp). Không
+  tạo repo model giả, không upload. Tài liệu bàn giao:
+  `docs/model_release_handoff.md`; utility `scripts/hf_release.py model-validate`
+  đã được kiểm chứng bằng fixture tổng hợp nhỏ (hợp lệ pass, thiếu weights fail).
+
 ## Khử trùng lặp quy mô lớn: backend memory vs sqlite
 
 ### Đo kiểm bộ nhớ (trước khi sửa)
