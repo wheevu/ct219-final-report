@@ -5,6 +5,19 @@ Pipeline streaming để làm sạch và chia tập văn bản tiếng Việt ch
 Pipeline giữ dấu tiếng Việt, cấu trúc đoạn và metadata truy vết.
 Nó không tokenize, huấn luyện model hoặc tự động loại văn bản chỉ vì ngôn ngữ có vẻ lạ.
 
+## Kết quả release 400k
+
+| Chỉ số | Kết quả |
+| --- | ---: |
+| Văn bản nguồn đã duyệt | 12.169.131 |
+| Văn bản được giữ | 400.000 |
+| Văn bản bị loại | 31.810 |
+| Tốc độ quét | 422,9 văn bản/giây |
+| Trùng ID hoặc hash sau kiểm định | 0 |
+
+Lần chạy mất khoảng 8 giờ, duyệt đủ 132 shard và khóa revision nguồn cùng commit của pipeline.
+Manifest, checksum và round-trip JSONL đều khớp.
+
 <table>
   <tr>
     <td><img src="docs/assets/domain_distribution.svg" alt="Phân bố domain qua pipeline"></td>
